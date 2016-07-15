@@ -14,6 +14,8 @@ class ViewController: UIViewController {
     
     var activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
     
+    var imagePath: String?
+    
     // MARK: - Outlets
     
     @IBOutlet var fullScreenImage: UIImageView!
@@ -30,6 +32,23 @@ class ViewController: UIViewController {
         
         downloadImageFromURL("https://upload.wikimedia.org/wikipedia/commons/f/f7/All_Souls_College_in_winter.jpg") { (imageData, error, errorDesc) in
             
+            /* Store the image */
+            var documentsDirectory: String?
+            
+            // NSSearchPathForDirectoriesInDomains returns the path as an array, though we are only looking for one path
+            let paths: [AnyObject] = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)
+            
+            if paths.count > 0 {
+                documentsDirectory = paths[0] as? String
+                
+                let savePath = documentsDirectory! + "/oxford.jpg"
+                
+                NSFileManager.defaultManager().createFileAtPath(savePath, contents: imageData, attributes: nil)
+                
+                self.imagePath = savePath
+            }
+            
+            /* Display the image */
             if let imageData = imageData {
                 let downloadedImage = UIImage(data: imageData)
                 performUIUpdatesOnMain {
@@ -37,6 +56,14 @@ class ViewController: UIViewController {
                     self.fullScreenImage.image = downloadedImage
                 }
             }
+            
+            /* Display the image by reading it from the documents directory */
+            if let imagePath = self.imagePath {
+                performUIUpdatesOnMain {
+                    self.fullScreenImage.image = UIImage(named: imagePath)
+                }
+            }
+            
             
             
             
